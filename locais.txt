@@ -1,0 +1,26 @@
+inicio (boot)
+00001
+
+setic
+00002
+
+segepe
+00003
+
+acs
+00004
+
+csaude
+00005
+
+elev_a_1
+00006
+
+elev_b_1
+00007
+
+elev_pan_1
+00008
+
+aspros
+00009
