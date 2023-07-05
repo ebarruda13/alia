@@ -31,28 +31,28 @@ String codigo = "";
 
 int audioInicio = 1;
 
-String codigoSetic = "E2801191A52000162346";
+String codigoSetic = "[E2801191A52000162346][E2801191A52000162354][E2801191A52000162355][E2801191A52000162356]";
 int audioSetic = 2;
 
-String codigoSegepe = "E2801191A52000162347";
+String codigoSegepe = "[E2801191A52000162347]";
 int audioSegepe = 3;
 
-String codigoAcs = "E2801191A52000162348";
+String codigoAcs = "[E2801191A52000162348]";
 int audioAcs = 4;
 
-String codigoCsaude = "E2801191A52000162351";
+String codigoCsaude = "[E2801191A52000162351]";
 int audioCsaude = 5;
 
-String codigoElevadorBlocoA1 = "E2801191A52008372A668";
+String codigoElevadorBlocoA1 = "[E2801191A52008372A668]";
 int audioElevadorBlocoA1 = 6;
 
-String codigoElevadorBlocoB1 = "E2801191A52000162349";
+String codigoElevadorBlocoB1 = "[E2801191A52000162349]";
 int audioElevadorBlocoB1 = 7;
 
-String codigoElevadorPanoramico1 = "E2801191A52000162353";
+String codigoElevadorPanoramico1 = "[E2801191A52000162353]";
 int audioElevadorPanoramico1 = 8;
 
-String codigoAspros = "E2801191A52000162350";
+String codigoAspros = "[E2801191A52000162350][E2801191A52000162357][E2801191A52000162358][E2801191A52000162359]";
 int audioAspros = 9;
 
 void setup() {
@@ -170,7 +170,7 @@ void loop() {
 
           display.drawString(63, 10, codigo);
           
-          if (codigo == codigoSetic) {
+          if (codigoSetic.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
 
@@ -184,7 +184,7 @@ void loop() {
             display.display();
           } 
 
-          if (codigo == codigoSegepe) {
+          if (codigoSegepe.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
 
@@ -198,7 +198,7 @@ void loop() {
             display.display();
           }
 
-          if (codigo == codigoAcs) {
+          if (codigoAcs.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
 
@@ -212,7 +212,7 @@ void loop() {
             display.display();
           } 
 
-          if (codigo == codigoCsaude) {
+          if (codigoCsaude.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
 
@@ -226,7 +226,7 @@ void loop() {
             display.display();
           } 
 
-          if (codigo == codigoElevadorBlocoA1) {
+          if (codigoElevadorBlocoA1.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
 
@@ -240,7 +240,7 @@ void loop() {
             display.display();
           }
 
-          if (codigo == codigoElevadorBlocoB1) {
+          if (codigoElevadorBlocoB1.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
 
@@ -254,7 +254,7 @@ void loop() {
             display.display();
           }
 
-          if (codigo == codigoElevadorPanoramico1) {
+          if (codigoElevadorPanoramico1.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
 
@@ -268,7 +268,7 @@ void loop() {
             display.display();
           }
 
-          if (codigo == codigoAspros) {
+          if (codigoAspros.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
 
