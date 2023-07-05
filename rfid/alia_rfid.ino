@@ -13,7 +13,8 @@ SSD1306Wire display(0x3c, D6, D5);
 DY::Player player;
 
 // leia o comando várias vezes
-unsigned char ReadMulti[10] = {0XAA,0X00,0X27,0X00,0X03,0X22,0XFF,0XFF,0X4A,0XDD};
+unsigned char readMulti[10] = {0XAA,0X00,0X27,0X00,0X03,0X22,0XFF,0XFF,0X4A,0XDD};
+unsigned char stopRead[7] = {0XAA,0X00,0X28,0X00,0X00,0X28,0XDD}; // AA 00 28 00 00 28 DD 
 unsigned int timeSec = 0;
 unsigned int timemin = 0;
 unsigned int dataAdd = 0;
@@ -26,6 +27,7 @@ int identificado = 0;
 int ledCodigoOk = D0;
 
 unsigned long millisLed = millis();
+unsigned long millisInicio = millis();
 
 String codigo = "";
 
@@ -62,7 +64,7 @@ void setup() {
   
   rfidSerial.println("Hello world.");// "Hello world."
   
-  rfidSerial.write(ReadMulti,10);
+  rfidSerial.write(readMulti, 10);
 
   display.init();
   display.flipScreenVertically();
@@ -71,15 +73,18 @@ void setup() {
   display.setFont(ArialMT_Plain_16);
   display.drawString(63, 10, "ALIA - TRT13");
   display.display();
+  
+  player.begin();
+  player.setVolume(100);
 }
 
 void loop() {
   if (inicio == 1) {
-    inicio = 0;
+    if ((millis() - millisInicio) > 500) {
+      inicio = 0;
 
-    player.begin();
-    player.setVolume(100);
-    player.playSpecified(audioInicio);
+      player.playSpecified(audioInicio);
+    }
   }
 
   // Comandos de leitura cíclica ocorrem após algum intervalo de tempo
@@ -94,7 +99,7 @@ void loop() {
       timemin = 0;
 
       // Enviar comando de leitura cíclica
-      rfidSerial.write(ReadMulti, 10);
+      rfidSerial.write(readMulti, 10);
     }
   }
  
@@ -174,6 +179,8 @@ void loop() {
             codigo = "";
             identificado = 1;
 
+            rfidSerial.write(stopRead, 7);
+
             player.playSpecified(audioSetic);
             
             digitalWrite(ledCodigoOk, HIGH);
@@ -187,6 +194,8 @@ void loop() {
           if (codigoSegepe.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
+
+            rfidSerial.write(stopRead, 7);
 
             player.playSpecified(audioSegepe);
 
@@ -202,6 +211,8 @@ void loop() {
             codigo = "";
             identificado = 1;
 
+            rfidSerial.write(stopRead, 7);
+
             player.playSpecified(audioAcs);
             
             digitalWrite(ledCodigoOk, HIGH);
@@ -215,6 +226,8 @@ void loop() {
           if (codigoCsaude.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
+
+            rfidSerial.write(stopRead, 7);
 
             player.playSpecified(audioCsaude);
             
@@ -230,6 +243,8 @@ void loop() {
             codigo = "";
             identificado = 1;
 
+            rfidSerial.write(stopRead, 7);
+
             player.playSpecified(audioElevadorBlocoA1);
 
             digitalWrite(ledCodigoOk, HIGH);
@@ -243,6 +258,8 @@ void loop() {
           if (codigoElevadorBlocoB1.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
+
+            rfidSerial.write(stopRead, 7);
 
             player.playSpecified(audioElevadorBlocoB1);
 
@@ -258,6 +275,8 @@ void loop() {
             codigo = "";
             identificado = 1;
 
+            rfidSerial.write(stopRead, 7);
+
             player.playSpecified(audioElevadorPanoramico1);
 
             digitalWrite(ledCodigoOk, HIGH);
@@ -271,6 +290,8 @@ void loop() {
           if (codigoAspros.indexOf("[" + codigo + "]") >= 0) {
             codigo = "";
             identificado = 1;
+
+            rfidSerial.write(stopRead, 7);
 
             player.playSpecified(audioAspros);
             
@@ -308,8 +329,10 @@ void loop() {
   }
 
   if (digitalRead(ledCodigoOk) == HIGH) {
-    if((millis() - millisLed) > 3000){
+    if ((millis() - millisLed) > 8000) {
       digitalWrite(ledCodigoOk, LOW);
+
+      rfidSerial.write(readMulti, 10);
     }
   }
 }
