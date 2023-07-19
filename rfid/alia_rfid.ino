@@ -1,3 +1,8 @@
+//
+// ALIA - RFid
+// Versao 1.0
+// TRT13 - Por Ericson Benjamim
+//
 #include <Wire.h>
 #include "SSD1306Wire.h"
 #include <SoftwareSerial.h>
@@ -23,7 +28,6 @@ unsigned int parState = 0;
 unsigned int codeState = 0;
 
 int inicio = 1;
-int identificado = 0;
 int ledCodigoOk = D0;
 
 unsigned long millisLed = millis();
@@ -33,46 +37,47 @@ String codigo = "";
 
 int audioInicio = 1;
 
-String codigoSetic = "[E2801191A52000162346][E2801191A52000162354][E2801191A52000162355][E2801191A52000162356]";
-int audioSetic = 2;
+String codigoSetor[] = {
+  // Adicionar numero do audio correspondente na mesma posicao no array audioSetor
+  "E2801191A52000162346","E2801191A52000162354","E2801191A52000162355","E2801191A52000162356", // SETIC
+  "E2801191A52000162347", // SEGEPE
+  "E2801191A52000162348", // ACS
+  "E2801191A52000162351", // CSAUDE
+  "E2801191A52008372A668", // ElevadorBlocoA1
+  "E2801191A52000162349", // ElevadorBlocoB1
+  "E2801191A52000162353", // ElevadorPanoramico1
+  "E2801191A52000162350","E2801191A52000162357","E2801191A52000162358","E2801191A52000162359", // ASPROS
+};
 
-String codigoSegepe = "[E2801191A52000162347]";
-int audioSegepe = 3;
+int audioSetor[] = {
+  2, 2, 2, 2, // SETIC
+  3, // SEGEPE
+  4, // ACS
+  5, // CSAUDE
+  6, // ElevadorBlocoA1
+  7, // ElevadorBlocoB1
+  8, // ElevadorPanoramico1
+  9, 9 ,9 ,9 // ASPROS
+};
 
-String codigoAcs = "[E2801191A52000162348]";
-int audioAcs = 4;
+String nomeSetor[] = {
+  "SETIC", "SEGEPE", "ACS", "CSAUDE", "ElevadorBlocoA1", "ElevadorBlocoB1", "ElevadorPanoramico1", "ASPROS"
+};
 
-String codigoCsaude = "[E2801191A52000162351]";
-int audioCsaude = 5;
-
-String codigoElevadorBlocoA1 = "[E2801191A52008372A668]";
-int audioElevadorBlocoA1 = 6;
-
-String codigoElevadorBlocoB1 = "[E2801191A52000162349]";
-int audioElevadorBlocoB1 = 7;
-
-String codigoElevadorPanoramico1 = "[E2801191A52000162353]";
-int audioElevadorPanoramico1 = 8;
-
-String codigoAspros = "[E2801191A52000162350][E2801191A52000162357][E2801191A52000162358][E2801191A52000162359]";
-int audioAspros = 9;
+int audioSetorAnterior = -1;
+unsigned long millisLeituraAnterior = millis();
 
 void setup() {
   pinMode(ledCodigoOk, OUTPUT);
   
   rfidSerial.begin(115200);
   
-  rfidSerial.println("Hello world.");// "Hello world."
+  rfidSerial.println("Hello world.");
   
   rfidSerial.write(readMulti, 10);
 
   display.init();
   display.flipScreenVertically();
-  display.clear();
-  display.setTextAlignment(TEXT_ALIGN_CENTER);
-  display.setFont(ArialMT_Plain_16);
-  display.drawString(63, 10, "ALIA - TRT13");
-  display.display();
   
   player.begin();
   player.setVolume(100);
@@ -82,6 +87,12 @@ void loop() {
   if (inicio == 1) {
     if ((millis() - millisInicio) > 500) {
       inicio = 0;
+
+      display.clear();
+      display.setTextAlignment(TEXT_ALIGN_CENTER);
+      display.setFont(ArialMT_Plain_16);
+      display.drawString(63, 10, "ALIA - TRT13");
+      display.display();
 
       player.playSpecified(audioInicio);
     }
@@ -174,157 +185,48 @@ void loop() {
           display.setFont(ArialMT_Plain_10);
 
           display.drawString(63, 10, codigo);
+
+          if (retornaAudioSetor(codigo) == audioSetorAnterior && millis() - millisLeituraAnterior < 12000) {
+            codigo = "";
+
+            digitalWrite(ledCodigoOk, HIGH);
+
+            rfidSerial.write(stopRead, 7);
+          }
           
-          if (codigoSetic.indexOf("[" + codigo + "]") >= 0) {
+          if (retornaAudioSetor(codigo) > 0) {
+            audioSetorAnterior = retornaAudioSetor(codigo);
             codigo = "";
-            identificado = 1;
+            millisLeituraAnterior = millis();
 
             rfidSerial.write(stopRead, 7);
 
-            player.playSpecified(audioSetic);
+            player.playSpecified(audioSetorAnterior);
             
             digitalWrite(ledCodigoOk, HIGH);
 
             millisLed = millis();
 
-            display.drawString(63, 45, "VOCE ESTA PROXIMO A SETIC");
-            display.display();
-          } 
-
-          if (codigoSegepe.indexOf("[" + codigo + "]") >= 0) {
-            codigo = "";
-            identificado = 1;
-
-            rfidSerial.write(stopRead, 7);
-
-            player.playSpecified(audioSegepe);
-
-            digitalWrite(ledCodigoOk, HIGH);
-
-            millisLed = millis();
-
-            display.drawString(63, 45, "VOCE ESTA PROXIMO A SEGEPE");
+            display.drawString(63, 45, "VOCE ESTA PROXIMO A " + nomeSetor[audioSetorAnterior - 2]);
             display.display();
           }
 
-          if (codigoAcs.indexOf("[" + codigo + "]") >= 0) {
-            codigo = "";
-            identificado = 1;
-
-            rfidSerial.write(stopRead, 7);
-
-            player.playSpecified(audioAcs);
-            
-            digitalWrite(ledCodigoOk, HIGH);
-
-            millisLed = millis();
-
-            display.drawString(63, 45, "VOCE ESTA PROXIMO A ACS");
-            display.display();
-          } 
-
-          if (codigoCsaude.indexOf("[" + codigo + "]") >= 0) {
-            codigo = "";
-            identificado = 1;
-
-            rfidSerial.write(stopRead, 7);
-
-            player.playSpecified(audioCsaude);
-            
-            digitalWrite(ledCodigoOk, HIGH);
-
-            millisLed = millis();
-
-            display.drawString(63, 45, "VOCE ESTA PROXIMO A CSAUDE");
-            display.display();
-          } 
-
-          if (codigoElevadorBlocoA1.indexOf("[" + codigo + "]") >= 0) {
-            codigo = "";
-            identificado = 1;
-
-            rfidSerial.write(stopRead, 7);
-
-            player.playSpecified(audioElevadorBlocoA1);
-
-            digitalWrite(ledCodigoOk, HIGH);
-
-            millisLed = millis();
-
-            display.drawString(63, 45, "VOCE ESTA PROXIMO AO ELEV A1");
-            display.display();
-          }
-
-          if (codigoElevadorBlocoB1.indexOf("[" + codigo + "]") >= 0) {
-            codigo = "";
-            identificado = 1;
-
-            rfidSerial.write(stopRead, 7);
-
-            player.playSpecified(audioElevadorBlocoB1);
-
-            digitalWrite(ledCodigoOk, HIGH);
-
-            millisLed = millis();
-
-            display.drawString(63, 45, "VOCE ESTA PROXIMO AO ELEV B1");
-            display.display();
-          }
-
-          if (codigoElevadorPanoramico1.indexOf("[" + codigo + "]") >= 0) {
-            codigo = "";
-            identificado = 1;
-
-            rfidSerial.write(stopRead, 7);
-
-            player.playSpecified(audioElevadorPanoramico1);
-
-            digitalWrite(ledCodigoOk, HIGH);
-
-            millisLed = millis();
-
-            display.drawString(63, 45, "VOCE ESTA PROXIMO AO ELEV PAN1");
-            display.display();
-          }
-
-          if (codigoAspros.indexOf("[" + codigo + "]") >= 0) {
-            codigo = "";
-            identificado = 1;
-
-            rfidSerial.write(stopRead, 7);
-
-            player.playSpecified(audioAspros);
-            
-            digitalWrite(ledCodigoOk, HIGH);
-
-            millisLed = millis();
-
-            display.drawString(63, 45, "VOCE ESTA PROXIMO A ASPROS");
-            display.display();
-          } 
-
-          if (identificado == 0) {
-            codigo = "";
-            display.drawString(63, 45, codigo);
-            display.display();
-          } else {
-            identificado = 0;
-          }
+          codigo = "";
         }
        }
        // Estouro de localização, re-receber
-       else if(dataAdd >= 21){
-        rfidSerial.println(" "); 
+       else if (dataAdd >= 21) {
+         rfidSerial.println(" "); 
 		
-        dataAdd= 0;
-        parState = 0;
-        codeState = 0;
+         dataAdd= 0;
+         parState = 0;
+         codeState = 0;
         }
     }
-     else{
-      dataAdd= 0;
-      parState = 0;
-      codeState = 0;
+     else {
+       dataAdd= 0;
+       parState = 0;
+       codeState = 0;
     }
   }
 
@@ -335,4 +237,18 @@ void loop() {
       rfidSerial.write(readMulti, 10);
     }
   }
+}
+
+int retornaAudioSetor(String pCodigo) {
+  int resultado = 0;
+
+  for (int i = 0; i < sizeof(codigoSetor) / sizeof(codigoSetor[0]); i++) {
+    if (pCodigo == codigoSetor[i]) {
+      resultado = audioSetor[i];
+
+      break;
+    }
+  }
+
+  return resultado;
 }
